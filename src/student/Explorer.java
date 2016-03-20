@@ -2,9 +2,13 @@ package student;
 
 import game.EscapeState;
 import game.ExplorationState;
+import game.GameState;
+import game.NodeStatus;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class Explorer {
 
@@ -39,15 +43,25 @@ public class Explorer {
      * @param state the information available at the current state
      */
     public void explore(ExplorationState state) {
-        Set<Long> discovered = new HashSet<>();
-        long start = state.getCurrentLocation();
-        discovered.add(start);
-        while (state.getDistanceToTarget() > 0) {
-            long move = state.getNeighbours().stream().filter(x -> !discovered.contains(x.getId())).findFirst().get().getId();
-            discovered.add(move);
-            state.moveTo(move);
+
+//        Set<Long> visited = new HashSet<>();
+        Stack<Long> nodes_to_be_visited = new Stack<>();
+
+        Long start = state.getCurrentLocation();
+        Long next = state.getNeighbours().stream().findFirst().get().getId();
+//        visited.add(start);
+        nodes_to_be_visited.push(next);
+        while (!nodes_to_be_visited.isEmpty()){
+            Long node = nodes_to_be_visited.peek();
+            state.moveTo(node);
+            state.getNeighbours().stream()
+                    .map(nodeStatus -> nodeStatus.getId())
+                    .filter(pos -> pos != start && pos!=node)
+                    .forEach(nodes_to_be_visited::push);
         }
-        return;
+
+
+        if(state.getDistanceToTarget() == 0) return;
 
     }
 
