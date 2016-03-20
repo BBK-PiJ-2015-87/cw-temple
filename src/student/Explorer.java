@@ -3,6 +3,9 @@ package student;
 import game.EscapeState;
 import game.ExplorationState;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Explorer {
 
     /**
@@ -36,7 +39,16 @@ public class Explorer {
      * @param state the information available at the current state
      */
     public void explore(ExplorationState state) {
-        //TODO:
+        Set<Long> discovered = new HashSet<>();
+        long start = state.getCurrentLocation();
+        discovered.add(start);
+        while (state.getDistanceToTarget() > 0) {
+            long move = state.getNeighbours().stream().filter(x -> !discovered.contains(x.getId())).findFirst().get().getId();
+            discovered.add(move);
+            state.moveTo(move);
+        }
+        return;
+
     }
 
     /**
