@@ -80,34 +80,32 @@ public class Explorer {
      * @param state
      */
     private void dfs(ExplorationState state) {
-        Set<Long> visited = new HashSet<>();
-        Stack<Long> nodes_to_be_visited = new Stack<>();
+        Set<NodeStatus> visited = new HashSet<>();
+        Stack<NodeStatus> nodes_to_be_visited = new Stack<>();
 
-        Long start = state.getCurrentLocation();
-        Long node = state.getNeighbours().stream().findFirst().get().getId();
-        visited.add(start);
-        nodes_to_be_visited.push(node);
+        NodeStatus firstNode = state.getNeighbours().stream().findFirst().get();
+        visited.add(firstNode);
+        nodes_to_be_visited.push(firstNode);
+
         while (!nodes_to_be_visited.isEmpty()){
-            Long next = nodes_to_be_visited.peek();
-            state.moveTo(next);
+            NodeStatus next = nodes_to_be_visited.peek();
+            state.moveTo(next.getId());
             visited.add(next);
 
             //pick the Orb
             if(state.getDistanceToTarget() == 0) return;
 
 
-            List<Long> nextTiles = state.getNeighbours().stream()
-                    .map(nodeStatus -> nodeStatus.getId())
-                    .filter(pos -> !visited.contains(pos))
-                    .sorted()
+            List<NodeStatus> nextTiles = state.getNeighbours().stream()
+                    .filter(node -> !visited.contains(node))
+                    .sorted() //sort by distance
                     .collect(Collectors.toList());
 
-            Collections.reverse(nextTiles);
 
             if (nextTiles.isEmpty()) {
                 visited.add(nodes_to_be_visited.pop());
             } else {
-                nodes_to_be_visited.push(nextTiles.get(0));
+                nodes_to_be_visited.push(nextTiles.get(0)); //select first node with minimal distance
             }
         }
     }
