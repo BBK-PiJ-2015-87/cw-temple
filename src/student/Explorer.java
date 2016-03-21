@@ -4,6 +4,7 @@ import game.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Explorer {
 
@@ -74,6 +75,7 @@ public class Explorer {
         Node start = state.getCurrentNode();
         Node exit = state.getExit();
 
+        //set up
         for (Node n : state.getVertices()) {
             if (n == start) {
                 predecessors.put(n, start);
@@ -84,20 +86,25 @@ public class Explorer {
                 distance.put(n, Integer.MAX_VALUE);
             }
             queue.add(n);
-
-
         }
 
         while (!queue.isEmpty()) {
             Node node = queue.remove();
-            for (Node n : node.getNeighbours()) {
-                if (!marked.contains(n)) {
-                    distance.put(n, distance.get(node) + node.getEdge(n).length());
-                    predecessors.put(n, node);
-                    marked.add(n);
-                    queue.add(n);
-                }
-            }
+
+
+            node.getNeighbours().stream().filter(n -> !marked.contains(n)).forEach(n ->{
+                distance.put(n, distance.get(node) + node.getEdge(n).length());
+                marked.add(n);
+            });
+
+            Comparator<Map.Entry<Node, Integer>> byDistance =
+                    (Map.Entry<Node, Integer> entry1, Map.Entry<Node, Integer> entry2) -> entry1.getValue().compareTo(entry2.getValue());
+
+            distance.entrySet().stream()
+                    .filter(entry -> node.getNeighbours().contains(entry.getKey()))
+                    .min(byDistance);
+
+
         }
 
         Stack<Node> path = getPath(exit, start, marked, predecessors);
