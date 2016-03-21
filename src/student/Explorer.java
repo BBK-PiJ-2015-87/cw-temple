@@ -102,6 +102,7 @@ public class Explorer {
                     .sorted()
                     .collect(Collectors.toList());
 
+            Collections.reverse(nextTiles);
 
             if (nextTiles.isEmpty()) {
                 visited.add(nodes_to_be_visited.pop());
