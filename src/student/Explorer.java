@@ -67,15 +67,60 @@ public class Explorer {
      * @param state the information available at the current state
      */
     public void escape(EscapeState state) {
+        Queue<Node> queue = new LinkedList<>();
+        Set<Node> marked = new HashSet<>();
+        Map<Node, Node> predecessors = new HashMap<>();
+        Map<Node, Integer> distance = new HashMap<>();
+        Node start = state.getCurrentNode();
+        Node exit = state.getExit();
+
+        for (Node n : state.getVertices()) {
+            if (n == start) {
+                predecessors.put(n, start);
+                distance.put(n, 0);
+                marked.add(n);
+            } else {
+                predecessors.put(n, null);
+                distance.put(n, Integer.MAX_VALUE);
+            }
+            queue.add(n);
 
 
+        }
+
+        while (!queue.isEmpty()) {
+            Node node = queue.remove();
+            for (Node n : node.getNeighbours()) {
+                if (!marked.contains(n)) {
+                    distance.put(n, distance.get(node) + node.getEdge(n).length());
+                    predecessors.put(n, node);
+                    marked.add(n);
+                    queue.add(n);
+                }
+            }
+        }
+
+        Stack<Node> path = getPath(exit, start, marked, predecessors);
 
         goToExit(path, state);
 
     }
 
-    private void goToExit(List<Node> path, EscapeState state) {
-        path.stream().forEach(state::moveTo);
+    public Stack<Node> getPath(Node exit, Node start, Set<Node> marked, Map<Node, Node> predecessors) {
+        if (!marked.contains(exit)) return null;
+
+        Stack<Node> shortestPath = new Stack<Node>();
+        Node node;
+        for (node = exit; !node.equals(start); node = predecessors.get(node)){
+            shortestPath.push(node);
+        }
+        return shortestPath;
+    }
+
+    private void goToExit(Stack<Node> path, EscapeState state) {
+        while (!path.empty()) {
+            state.moveTo(path.pop());
+        }
     }
 
     /**
