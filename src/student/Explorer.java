@@ -44,20 +44,34 @@ public class Explorer {
      */
     public void explore(ExplorationState state) {
 
-//        Set<Long> visited = new HashSet<>();
+        Set<Long> visited = new HashSet<>();
         Stack<Long> nodes_to_be_visited = new Stack<>();
 
         Long start = state.getCurrentLocation();
-        Long next = state.getNeighbours().stream().findFirst().get().getId();
-//        visited.add(start);
-        nodes_to_be_visited.push(next);
+        Long node = state.getNeighbours().stream().findFirst().get().getId();
+        visited.add(start);
+        nodes_to_be_visited.push(node);
         while (!nodes_to_be_visited.isEmpty()){
-            Long node = nodes_to_be_visited.peek();
-            state.moveTo(node);
+            System.out.println("VISITED: " + visited);
+            System.out.println("TO BE: " + nodes_to_be_visited);
+            Long next = nodes_to_be_visited.peek();
+            if (visited.contains(next)) {
+                next = nodes_to_be_visited.pop();
+            }
+            System.out.println("NOW AT:" + next);
+            state.moveTo(next);
+            visited.add(next);
             state.getNeighbours().stream()
                     .map(nodeStatus -> nodeStatus.getId())
-                    .filter(pos -> pos != start && pos!=node)
+                    .filter(pos -> !visited.contains(pos))
                     .forEach(nodes_to_be_visited::push);
+
+            state.getNeighbours().stream()
+                    .map(nodeStatus -> nodeStatus.getId())
+                    .filter(pos -> !visited.contains(pos))
+                    .forEach(System.out::println);
+
+
         }
 
 
