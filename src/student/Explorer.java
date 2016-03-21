@@ -5,10 +5,7 @@ import game.ExplorationState;
 import game.GameState;
 import game.NodeStatus;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Explorer {
@@ -98,15 +95,18 @@ public class Explorer {
             //pick the Orb
             if(state.getDistanceToTarget() == 0) return;
 
-            Optional<Long> nextTiles = state.getNeighbours().stream()
+
+            List<Long> nextTiles = state.getNeighbours().stream()
                     .map(nodeStatus -> nodeStatus.getId())
                     .filter(pos -> !visited.contains(pos))
-                    .findFirst();
+                    .sorted()
+                    .collect(Collectors.toList());
 
-            if (!nextTiles.isPresent()) {
+
+            if (nextTiles.isEmpty()) {
                 visited.add(nodes_to_be_visited.pop());
             } else {
-                nodes_to_be_visited.push(nextTiles.get());
+                nodes_to_be_visited.push(nextTiles.get(0));
             }
         }
     }
