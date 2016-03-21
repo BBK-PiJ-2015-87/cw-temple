@@ -6,6 +6,7 @@ import game.GameState;
 import game.NodeStatus;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -44,40 +45,10 @@ public class Explorer {
      */
     public void explore(ExplorationState state) {
 
-        Set<Long> visited = new HashSet<>();
-        Stack<Long> nodes_to_be_visited = new Stack<>();
-
-        Long start = state.getCurrentLocation();
-        Long node = state.getNeighbours().stream().findFirst().get().getId();
-        visited.add(start);
-        nodes_to_be_visited.push(node);
-        while (!nodes_to_be_visited.isEmpty()){
-            System.out.println("VISITED: " + visited);
-            System.out.println("TO BE: " + nodes_to_be_visited);
-            Long next = nodes_to_be_visited.peek();
-            if (visited.contains(next)) {
-                next = nodes_to_be_visited.pop();
-            }
-            System.out.println("NOW AT:" + next);
-            state.moveTo(next);
-            visited.add(next);
-            state.getNeighbours().stream()
-                    .map(nodeStatus -> nodeStatus.getId())
-                    .filter(pos -> !visited.contains(pos))
-                    .forEach(nodes_to_be_visited::push);
-
-            state.getNeighbours().stream()
-                    .map(nodeStatus -> nodeStatus.getId())
-                    .filter(pos -> !visited.contains(pos))
-                    .forEach(System.out::println);
-
-
-        }
-
-
-        if(state.getDistanceToTarget() == 0) return;
-
+        dfs(state);
     }
+
+
 
     /**
      * Escape from the cavern before the ceiling collapses, trying to collect as much
@@ -104,5 +75,39 @@ public class Explorer {
      */
     public void escape(EscapeState state) {
         //TODO: Escape from the cavern before time runs out
+    }
+
+    /**
+     * Depth first search algorithm to find Orb.
+     *
+     * @param state
+     */
+    private void dfs(ExplorationState state) {
+        Set<Long> visited = new HashSet<>();
+        Stack<Long> nodes_to_be_visited = new Stack<>();
+
+        Long start = state.getCurrentLocation();
+        Long node = state.getNeighbours().stream().findFirst().get().getId();
+        visited.add(start);
+        nodes_to_be_visited.push(node);
+        while (!nodes_to_be_visited.isEmpty()){
+            Long next = nodes_to_be_visited.peek();
+            state.moveTo(next);
+            visited.add(next);
+
+            //pick the Orb
+            if(state.getDistanceToTarget() == 0) return;
+
+            Optional<Long> nextTiles = state.getNeighbours().stream()
+                    .map(nodeStatus -> nodeStatus.getId())
+                    .filter(pos -> !visited.contains(pos))
+                    .findFirst();
+
+            if (!nextTiles.isPresent()) {
+                visited.add(nodes_to_be_visited.pop());
+            } else {
+                nodes_to_be_visited.push(nextTiles.get());
+            }
+        }
     }
 }
