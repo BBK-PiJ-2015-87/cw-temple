@@ -41,8 +41,8 @@ public class Explorer {
      * @param state the information available at the current state
      */
     public void explore(ExplorationState state) {
-
-        dfs(state);
+        dfs(state); //depth first search
+//        bfs(state); //breadth first search. Doesn't work
     }
 
 
@@ -107,6 +107,45 @@ public class Explorer {
             } else {
                 nodes_to_be_visited.push(nextTiles.get(0)); //select first node with minimal distance
             }
+        }
+    }
+
+    private void bfs(ExplorationState state) {
+        Set<NodeStatus> visited = new HashSet<>();
+        Queue<NodeStatus> nodes_to_be_visited = new LinkedList<>();
+
+        NodeStatus firstNode = state.getNeighbours().stream().findFirst().get();
+        visited.add(firstNode);
+        nodes_to_be_visited.add(firstNode);
+
+        while (!nodes_to_be_visited.isEmpty()){
+            System.out.println("TO BE VISITED:");
+            nodes_to_be_visited.stream().map(n->n.getId()).forEach(System.out::println);
+            System.out.println();
+
+            NodeStatus next = nodes_to_be_visited.remove();
+            System.out.println("STAND ON: " + next.getId());
+            state.moveTo(next.getId());
+            visited.add(next); //mark node as visited
+
+            System.out.println("HAS VISITED:");
+            visited.stream().map(n->n.getId()).forEach(System.out::println);
+            System.out.println();
+
+            //pick the Orb
+            if(state.getDistanceToTarget() == 0) return;
+
+
+            List<NodeStatus> nextTiles = state.getNeighbours().stream()
+                    .filter(node -> !visited.contains(node))
+                    .collect(Collectors.toList());
+
+            System.out.println("NEIGHBOURS:");
+            nextTiles.stream().map(n->n.getId()).forEach(System.out::println);
+            System.out.println();
+
+            if (!nextTiles.isEmpty()) nodes_to_be_visited.addAll(nextTiles); //select first node with minimal distance
+
         }
     }
 }
