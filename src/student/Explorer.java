@@ -90,7 +90,7 @@ public class Explorer {
         while (!nodes_to_be_visited.isEmpty()){
             NodeStatus next = nodes_to_be_visited.peek();
             state.moveTo(next.getId());
-            visited.add(next);
+            visited.add(next); //mark node as visited
 
             //pick the Orb
             if(state.getDistanceToTarget() == 0) return;
